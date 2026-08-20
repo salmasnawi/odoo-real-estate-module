@@ -1,0 +1,5 @@
+.venv/
+odoo/
+__pycache__/
+*.pyc
+*.log
