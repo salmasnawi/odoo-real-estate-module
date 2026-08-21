@@ -28,7 +28,9 @@
         </field>
 
     </record>
-    <record id="estate_property_form_view" model="ir.ui.view">
+
+<!-- Form View -->
+<record id="estate_property_form_view" model="ir.ui.view">
 
     <field name="name">estate.property.form</field>
 
@@ -37,6 +39,7 @@
     <field name="arch" type="xml">
 
         <form>
+
             <sheet>
 
                 <group>
@@ -45,49 +48,77 @@
                     <field name="expected_price"/>
                     <field name="bedrooms"/>
                     <field name="living_area"/>
+                    <field name="owner_id"/>
+                    <field name="tag_ids" widget="many2many_tags"/>
 
                 </group>
+                <notebook>
+
+    <page string="Offers">
+
+        <field name="offer_ids">
+
+            <list editable="bottom">
+
+                <field name="price"/>
+
+            </list>
+
+        </field>
+
+    </page>
+
+</notebook>
 
             </sheet>
+
         </form>
 
     </field>
 
 </record>
-<record id="estate_property_search_view" model="ir.ui.view">
 
-    <field name="name">estate.property.search</field>
+    <!-- Search View -->
+    <record id="estate_property_search_view" model="ir.ui.view">
 
-    <field name="model">estate.property</field>
+        <field name="name">estate.property.search</field>
 
-    <field name="arch" type="xml">
+        <field name="model">estate.property</field>
 
-        <search>
+        <field name="arch" type="xml">
 
-            <field name="name"/>
-            <filter 
-    name="filter_new"
-    string="New"
-    domain="[('state','=','new')]"
-/>
+            <search>
 
-        </search>
+                <field name="name"/>
 
-    </field>
+                <filter
+                    name="filter_new"
+                    string="New"
+                    domain="[('state','=','new')]"
+                />
 
-</record>
+            </search>
 
+        </field>
+
+    </record>
+
+
+    <!-- Menus -->
 
     <menuitem id="estate_menu_root"
               name="Real Estate"/>
+
 
     <menuitem id="estate_first_level_menu"
               name="Advertisements"
               parent="estate_menu_root"/>
 
+
     <menuitem id="estate_property_menu_action"
               name="Properties"
               parent="estate_first_level_menu"
               action="estate_property_action"/>
+
 
 </odoo>
