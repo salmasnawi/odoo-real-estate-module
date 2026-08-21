@@ -1,5 +1,5 @@
-from odoo import fields, models
-
+from odoo import api, fields, models
+from odoo.exceptions import ValidationError
 
 class EstateProperty(models.Model):
     _name = 'estate.property'
@@ -8,6 +8,13 @@ class EstateProperty(models.Model):
     name = fields.Char(required=True)
 
     expected_price = fields.Float(required=True)
+
+    selling_price = fields.Float()
+
+    difference = fields.Float(
+        compute="_compute_difference",
+        string="Price Difference"
+    )
 
     bedrooms = fields.Integer(default=2)
 
@@ -42,3 +49,28 @@ class EstateProperty(models.Model):
         copy=False,
         default='new'
     )
+
+
+    # Computed Field
+    @api.depends('selling_price', 'expected_price')
+    def _compute_difference(self):
+        for record in self:
+            record.difference = (
+                record.selling_price - record.expected_price
+            )
+
+    # Onchange
+    @api.onchange('bedrooms')
+    def _onchange_bedrooms(self):
+        if self.bedrooms:
+            self.living_area = self.bedrooms * 30
+
+
+    # Constraint
+    @api.constrains('selling_price')
+    def _check_selling_price(self):
+        for record in self:
+            if record.selling_price < 0:
+                raise ValidationError(
+                    "Selling Price must be positive!"
+                )

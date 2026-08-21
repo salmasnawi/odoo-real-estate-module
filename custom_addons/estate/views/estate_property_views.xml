@@ -46,6 +46,8 @@
 
                     <field name="name"/>
                     <field name="expected_price"/>
+                    <field name="selling_price"/>
+                    <field name="difference"/>
                     <field name="bedrooms"/>
                     <field name="living_area"/>
                     <field name="owner_id"/>
