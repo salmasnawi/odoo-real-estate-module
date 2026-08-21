@@ -65,7 +65,6 @@ class EstateProperty(models.Model):
         if self.bedrooms:
             self.living_area = self.bedrooms * 30
 
-
     # Constraint
     @api.constrains('selling_price')
     def _check_selling_price(self):
@@ -74,3 +73,27 @@ class EstateProperty(models.Model):
                 raise ValidationError(
                     "Selling Price must be positive!"
                 )
+
+    # Override Create
+    @api.model_create_multi
+    def create(self, vals_list):
+        for vals in vals_list:
+            if not vals.get('name'):
+                vals['name'] = 'New Property'
+
+        return super().create(vals_list)
+        # Override Write
+    def write(self, vals):
+        if 'selling_price' in vals:
+            print("Selling price updated!")
+
+        return super().write(vals)
+        # Override Unlink
+    def unlink(self):
+        for record in self:
+            if record.state == 'sold':
+                raise ValidationError(
+                    "You cannot delete a sold property!"
+                )
+
+        return super().unlink()

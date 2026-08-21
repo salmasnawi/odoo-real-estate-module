@@ -41,19 +41,17 @@
         <form>
 
             <sheet>
-
-                <group>
-
-                    <field name="name"/>
-                    <field name="expected_price"/>
-                    <field name="selling_price"/>
-                    <field name="difference"/>
-                    <field name="bedrooms"/>
-                    <field name="living_area"/>
-                    <field name="owner_id"/>
-                    <field name="tag_ids" widget="many2many_tags"/>
-
-                </group>
+            <group>
+                <field name="name"/>
+                <field name="expected_price"/>
+                <field name="selling_price"/>
+                <field name="difference"/>
+                <field name="bedrooms"/>
+                <field name="living_area"/>
+                <field name="owner_id"/>
+                <field name="tag_ids" widget="many2many_tags"/>
+                <field name="state"/>
+            </group>
                 <notebook>
 
     <page string="Offers">
