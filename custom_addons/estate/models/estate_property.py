@@ -1,9 +1,14 @@
 from odoo import api, fields, models
 from odoo.exceptions import ValidationError
 
+
 class EstateProperty(models.Model):
-    _name = 'estate.property'
-    _description = 'Real Estate Property'
+    _name = "estate.property"
+    _description = "Real Estate Property"
+
+    # =========================
+    # Basic Fields
+    # =========================
 
     name = fields.Char(required=True)
 
@@ -11,62 +16,111 @@ class EstateProperty(models.Model):
 
     selling_price = fields.Float()
 
-    difference = fields.Float(
-        compute="_compute_difference",
-        string="Price Difference"
-    )
-
     bedrooms = fields.Integer(default=2)
 
     living_area = fields.Float()
 
+    # =========================
+    # Computed Fields
+    # =========================
+
+    difference = fields.Float(
+        compute="_compute_difference",
+        string="Price Difference",
+    )
+
+    offer_count = fields.Integer(
+        compute="_compute_offer_count",
+        string="Offers",
+    )
+
+    # =========================
+    # Relations
+    # =========================
+
     owner_id = fields.Many2one(
-        'res.partner',
-        string='Owner'
+        "res.partner",
+        string="Owner",
+    )
+
+    buyer_id = fields.Many2one(
+        "res.partner",
+        string="Buyer",
+        copy=False,
+    )
+
+    owner_email = fields.Char(
+        related="owner_id.email",
+        string="Owner Email",
+        readonly=True,
+    )
+
+    owner_phone = fields.Char(
+        related="owner_id.phone",
+        string="Owner Phone",
+        readonly=True,
     )
 
     offer_ids = fields.One2many(
-        'estate.property.offer',
-        'property_id',
-        string='Offers'
+        "estate.property.offer",
+        "property_id",
+        string="Offers",
     )
 
     tag_ids = fields.Many2many(
-        'estate.property.tag',
-        string='Tags'
+        "estate.property.tag",
+        string="Tags",
     )
+
+    # =========================
+    # Status
+    # =========================
 
     state = fields.Selection(
         [
-            ('new', 'New'),
-            ('offer_received', 'Offer Received'),
-            ('offer_accepted', 'Offer Accepted'),
-            ('sold', 'Sold'),
-            ('cancelled', 'Cancelled'),
+            ("new", "New"),
+            ("offer_received", "Offer Received"),
+            ("offer_accepted", "Offer Accepted"),
+            ("sold", "Sold"),
+            ("cancelled", "Cancelled"),
         ],
-        string='Status',
+        string="Status",
         required=True,
         copy=False,
-        default='new'
+        default="new",
     )
 
+    # =========================
+    # Compute Methods
+    # =========================
 
-    # Computed Field
-    @api.depends('selling_price', 'expected_price')
+    @api.depends("selling_price", "expected_price")
     def _compute_difference(self):
         for record in self:
             record.difference = (
                 record.selling_price - record.expected_price
             )
 
-    # Onchange
-    @api.onchange('bedrooms')
-    def _onchange_bedrooms(self):
-        if self.bedrooms:
-            self.living_area = self.bedrooms * 30
+    @api.depends("offer_ids")
+    def _compute_offer_count(self):
+        for record in self:
+            record.offer_count = len(record.offer_ids)
 
-    # Constraint
-    @api.constrains('selling_price')
+    # =========================
+    # Onchange
+    # =========================
+
+    @api.onchange("bedrooms")
+    def _onchange_bedrooms(self):
+        for record in self:
+            if record.bedrooms:
+                record.living_area = record.bedrooms * 30
+
+    # =========================
+    # Constraints
+    # =========================
+
+    @api.constrains("selling_price")
     def _check_selling_price(self):
         for record in self:
             if record.selling_price < 0:
@@ -74,26 +128,87 @@ class EstateProperty(models.Model):
                     "Selling Price must be positive!"
                 )
 
-    # Override Create
+    # =========================
+    # ORM Overrides
+    # =========================
+
     @api.model_create_multi
     def create(self, vals_list):
         for vals in vals_list:
-            if not vals.get('name'):
-                vals['name'] = 'New Property'
+            if not vals.get("name"):
+                vals["name"] = "New Property"
 
         return super().create(vals_list)
-        # Override Write
+
     def write(self, vals):
-        if 'selling_price' in vals:
+        if "state" in vals:
+            for record in self:
+                new_state = vals["state"]
+
+                if (
+                    record.state == "cancelled"
+                    and new_state == "sold"
+                ):
+                    raise ValidationError(
+                        "A cancelled property cannot be sold!"
+                    )
+
+                if (
+                    record.state == "sold"
+                    and new_state == "cancelled"
+                ):
+                    raise ValidationError(
+                        "A sold property cannot be cancelled!"
+                    )
+
+        if "selling_price" in vals:
             print("Selling price updated!")
 
         return super().write(vals)
-        # Override Unlink
+
     def unlink(self):
         for record in self:
-            if record.state == 'sold':
+            if record.state == "sold":
                 raise ValidationError(
                     "You cannot delete a sold property!"
                 )
 
         return super().unlink()
+
+    # =========================
+    # Action Methods
+    # =========================
+
+    def action_sold(self):
+        for record in self:
+            if record.state == "cancelled":
+                raise ValidationError(
+                    "A cancelled property cannot be sold!"
+                )
+
+            record.state = "sold"
+
+    def action_cancel(self):
+        for record in self:
+            if record.state == "sold":
+                raise ValidationError(
+                    "A sold property cannot be cancelled!"
+                )
+
+            record.state = "cancelled"
+
+    def action_view_offers(self):
+        self.ensure_one()
+
+        return {
+            "type": "ir.actions.act_window",
+            "name": "Offers",
+            "res_model": "estate.property.offer",
+            "view_mode": "list,form",
+            "domain": [
+                ("property_id", "=", self.id),
+            ],
+            "context": {
+                "default_property_id": self.id,
+            },
+        }
