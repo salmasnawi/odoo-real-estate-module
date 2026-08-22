@@ -5,6 +5,7 @@ from odoo.exceptions import ValidationError
 class EstateProperty(models.Model):
     _name = "estate.property"
     _description = "Real Estate Property"
+    _order = "id desc"
 
     # =========================
     # Basic Fields
@@ -71,6 +72,10 @@ class EstateProperty(models.Model):
         "estate.property.tag",
         string="Tags",
     )
+    property_type_id = fields.Many2one(
+    "estate.property.type",
+    string="Property Type",
+)
 
     # =========================
     # Status

@@ -3,48 +3,49 @@
 <odoo>
 
     <!-- ========================= -->
-    <!-- Window Action -->
+    <!-- Property Action -->
     <!-- ========================= -->
 
-    <record id="estate_property_action" model="ir.actions.act_window">
+<record id="estate_property_action" model="ir.actions.act_window">
 
-        <field name="name">Properties</field>
+    <field name="name">Properties</field>
 
-        <field name="res_model">estate.property</field>
+    <field name="res_model">estate.property</field>
 
-        <field name="view_mode">list,form</field>
+    <field name="view_mode">list,form</field>
 
-    </record>
+    <field name="context">
+        {'search_default_filter_available': 1}
+    </field>
+
+</record>
 
 
     <!-- ========================= -->
-    <!-- List View -->
+    <!-- Property List View -->
     <!-- ========================= -->
 
     <record id="estate_property_list_view" model="ir.ui.view">
 
         <field name="name">estate.property.list</field>
-
         <field name="model">estate.property</field>
 
         <field name="arch" type="xml">
 
-            <list>
+            <list
+                decoration-success="state in ('offer_received', 'offer_accepted')"
+                decoration-bf="state == 'offer_accepted'"
+                decoration-muted="state == 'sold'"
+            >
 
                 <field name="name"/>
-
+                <field name="property_type_id"/>
                 <field name="expected_price"/>
-
                 <field name="selling_price"/>
-
                 <field name="bedrooms"/>
-
                 <field name="living_area"/>
-
                 <field name="owner_id"/>
-
                 <field name="buyer_id"/>
-
                 <field name="state"/>
 
             </list>
@@ -55,22 +56,19 @@
 
 
     <!-- ========================= -->
-    <!-- Form View -->
+    <!-- Property Form View -->
     <!-- ========================= -->
 
     <record id="estate_property_form_view" model="ir.ui.view">
 
         <field name="name">estate.property.form</field>
-
         <field name="model">estate.property</field>
 
         <field name="arch" type="xml">
 
             <form>
 
-                <!-- ========================= -->
                 <!-- Header -->
-                <!-- ========================= -->
 
                 <header>
 
@@ -78,12 +76,14 @@
                         name="action_sold"
                         type="object"
                         string="Mark as Sold"
+                        invisible="state in ('sold', 'cancelled')"
                     />
 
                     <button
                         name="action_cancel"
                         type="object"
                         string="Cancel"
+                        invisible="state in ('sold', 'cancelled')"
                     />
 
                     <field
@@ -97,7 +97,7 @@
                 <sheet>
 
                     <!-- ========================= -->
-                    <!-- Smart Buttons -->
+                    <!-- Smart Button -->
                     <!-- ========================= -->
 
                     <div
@@ -135,6 +135,8 @@
 
                             <field name="owner_id"/>
 
+                            <field name="property_type_id"/>
+
                             <field
                                 name="owner_email"
                                 readonly="1"
@@ -153,6 +155,7 @@
                             <field
                                 name="tag_ids"
                                 widget="many2many_tags"
+                                options="{'color_field': 'color'}"
                             />
 
                             <field name="bedrooms"/>
@@ -186,9 +189,16 @@
 
                         <page string="Offers">
 
-                            <field name="offer_ids">
+                            <field
+                                name="offer_ids"
+                                readonly="state in ('offer_accepted', 'sold', 'cancelled')"
+                            >
 
-                                <list editable="bottom">
+                                <list
+                                    editable="bottom"
+                                    decoration-success="status == 'accepted'"
+                                    decoration-danger="status == 'refused'"
+                                >
 
                                     <field name="partner_id"/>
 
@@ -201,6 +211,7 @@
                                         type="object"
                                         string="Accept"
                                         icon="fa-check"
+                                        invisible="status != 'pending'"
                                     />
 
                                     <button
@@ -208,6 +219,7 @@
                                         type="object"
                                         string="Refuse"
                                         icon="fa-times"
+                                        invisible="status != 'pending'"
                                     />
 
                                 </list>
@@ -228,20 +240,30 @@
 
 
     <!-- ========================= -->
-    <!-- Search View -->
+    <!-- Property Search View -->
     <!-- ========================= -->
 
     <record id="estate_property_search_view" model="ir.ui.view">
 
         <field name="name">estate.property.search</field>
-
         <field name="model">estate.property</field>
 
         <field name="arch" type="xml">
 
             <search>
+            <field
+    name="living_area"
+    filter_domain="[('living_area', '>=', self)]"
+/>
+            <filter
+    name="filter_available"
+    string="Available"
+    domain="[('state', 'not in', ('sold', 'cancelled'))]"
+/>
 
                 <field name="name"/>
+
+                <field name="property_type_id"/>
 
                 <field name="owner_id"/>
 
@@ -258,13 +280,11 @@
                     domain="[('state', '=', 'new')]"
                 />
 
-
                 <filter
                     name="filter_sold"
                     string="Sold"
                     domain="[('state', '=', 'sold')]"
                 />
-
 
                 <filter
                     name="filter_cancelled"
@@ -278,6 +298,124 @@
 
     </record>
 
+
+    <!-- ========================= -->
+    <!-- Property Type Action -->
+    <!-- ========================= -->
+
+    <record id="estate_property_type_action" model="ir.actions.act_window">
+
+        <field name="name">Property Types</field>
+
+        <field name="res_model">estate.property.type</field>
+
+        <field name="view_mode">list,form</field>
+
+    </record>
+
+
+    <!-- ========================= -->
+    <!-- Property Type List View -->
+    <!-- ========================= -->
+
+    <record id="estate_property_type_list_view" model="ir.ui.view">
+
+        <field name="name">estate.property.type.list</field>
+
+        <field name="model">estate.property.type</field>
+
+        <field name="arch" type="xml">
+
+            <list editable="bottom">
+
+                <field
+                    name="sequence"
+                    widget="handle"
+                />
+
+                <field name="name"/>
+
+            </list>
+
+        </field>
+
+    </record>
+
+<!-- ========================= -->
+<!-- Property Type Form View -->
+<!-- ========================= -->
+
+<record id="estate_property_type_form_view" model="ir.ui.view">
+
+    <field name="name">estate.property.type.form</field>
+
+    <field name="model">estate.property.type</field>
+
+    <field name="arch" type="xml">
+
+        <form>
+
+            <sheet>
+
+                <!-- Smart Button -->
+
+                <div class="oe_button_box">
+
+                    <button
+                        name="action_view_offers"
+                        type="object"
+                        class="oe_stat_button"
+                        icon="fa-money"
+                    >
+
+                        <field
+                            name="offer_count"
+                            widget="statinfo"
+                            string="Offers"
+                        />
+
+                    </button>
+
+                </div>
+
+
+                <group>
+
+                    <field name="name"/>
+
+                </group>
+
+
+                <notebook>
+
+                    <page string="Properties">
+
+                        <field name="property_ids">
+
+                            <list>
+
+                                <field name="name"/>
+
+                                <field name="expected_price"/>
+
+                                <field name="state"/>
+
+                            </list>
+
+                        </field>
+
+                    </page>
+
+                </notebook>
+
+
+            </sheet>
+
+        </form>
+
+    </field>
+
+</record>
 
     <!-- ========================= -->
     <!-- Menus -->
@@ -301,6 +439,14 @@
         name="Properties"
         parent="estate_first_level_menu"
         action="estate_property_action"
+    />
+
+
+    <menuitem
+        id="estate_property_type_menu_action"
+        name="Property Types"
+        parent="estate_first_level_menu"
+        action="estate_property_type_action"
     />
 
 </odoo>

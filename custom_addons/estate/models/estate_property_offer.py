@@ -5,6 +5,7 @@ from odoo.exceptions import ValidationError
 class EstatePropertyOffer(models.Model):
     _name = "estate.property.offer"
     _description = "Property Offer"
+    _order = "price desc"
 
     price = fields.Float(
         required=True,
@@ -20,6 +21,9 @@ class EstatePropertyOffer(models.Model):
         "estate.property",
         string="Property",
         required=True,
+    )
+    property_type_id = fields.Many2one(
+        related="property_id.property_type_id",
     )
 
     status = fields.Selection(
