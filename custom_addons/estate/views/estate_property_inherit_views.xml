@@ -1,0 +1,21 @@
+<odoo>
+
+    <record id="estate_property_form_inherit_reference" model="ir.ui.view">
+
+        <field name="name">estate.property.form.inherit.reference</field>
+
+        <field name="model">estate.property</field>
+
+        <field name="inherit_id" ref="estate.estate_property_form_view"/>
+
+        <field name="arch" type="xml">
+
+            <xpath expr="//field[@name='name']" position="after">
+                <field name="reference_code"/>
+            </xpath>
+
+        </field>
+
+    </record>
+
+</odoo>
