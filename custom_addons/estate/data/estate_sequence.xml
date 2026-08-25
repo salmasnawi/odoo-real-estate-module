@@ -1,0 +1,15 @@
+<odoo>
+
+    <record id="estate_property_sequence" model="ir.sequence">
+
+        <field name="name">Estate Property</field>
+
+        <field name="code">estate.property</field>
+
+        <field name="prefix">PROP</field>
+
+        <field name="padding">4</field>
+
+    </record>
+
+</odoo>

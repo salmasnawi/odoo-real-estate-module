@@ -6,8 +6,10 @@
     ],
 "data": [
     "security/ir.model.access.csv",
+        "data/estate_sequence.xml",
+
     "views/estate_property_views.xml",
-    
+
 
     "views/estate_property_inherit_views.xml",
 ],
