@@ -1,0 +1,61 @@
+<odoo>
+
+    <record id="action_report_estate_property" model="ir.actions.report">
+        <field name="name">Property Report</field>
+        <field name="model">estate.property</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">estate.report_estate_property</field>
+        <field name="report_file">estate.report_estate_property</field>
+        <field name="binding_model_id" ref="model_estate_property"/>
+        <field name="binding_type">report</field>
+    </record>
+
+
+    <template id="report_estate_property">
+
+        <t t-call="web.html_container">
+
+            <t t-foreach="docs" t-as="property">
+
+                <t t-call="web.external_layout">
+
+                    <div class="page">
+
+                        <h2>Property Report</h2>
+
+                        <p>
+                            <strong>Name:</strong>
+                            <span t-field="property.name"/>
+                        </p>
+
+                        <p>
+                            <strong>Reference:</strong>
+                            <span t-field="property.reference_code"/>
+                        </p>
+
+                        <p>
+                            <strong>Expected Price:</strong>
+                            <span t-field="property.expected_price"/>
+                        </p>
+
+                        <p>
+                            <strong>Selling Price:</strong>
+                            <span t-field="property.selling_price"/>
+                        </p>
+
+                        <p>
+                            <strong>Buyer:</strong>
+                            <span t-field="property.buyer_id"/>
+                        </p>
+
+                    </div>
+
+                </t>
+
+            </t>
+
+        </t>
+
+    </template>
+
+</odoo>
